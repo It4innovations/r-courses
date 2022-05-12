@@ -1,3 +1,23 @@
+#' Partition data
+#'
+#' This function divide data into training and holdout set and returns them as a list.
+#' It uses caret package createDataPartition() function to make the division.
+#'
+#' @param input_data data.frame with all the data
+#' @param target_col name or column number of a target variable
+#' @param train_ratio what should be the ratio
+#' @param split_y should the target variable be returned separately?
+#'
+#' @return
+#' @importFrom dplyr select
+#' @importFrom caret createDataPartition
+#' @importFrom tibble as_tibble
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' .
+#' }
 get_data_partition <- function(input_data,
                                target_col,
                                train_ratio,
@@ -32,6 +52,22 @@ get_data_partition <- function(input_data,
 }
 
 
+#' Test ROC
+#'
+#' This function is taken from https://topepo.github.io/caret/subsampling-for-class-imbalances.html#subsampling-techniques and adjusted for this tutorial.
+#' It computes ROC on the test set.
+#'
+#' @param model This should be a caret model
+#' @param data These are new data for prediction
+#' @param y a vector with the refence data
+#'
+#' @return
+#' @importFrom pROC roc ci
+#' @export
+#' @examples
+#' \dontrun{
+#' .
+#' }
 test_roc <- function(model, data, y) {
   roc_obj <- pROC::roc(y |> as.numeric() -1,
                        predict(model, data) |> as.numeric() -1,

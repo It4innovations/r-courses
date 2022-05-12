@@ -15,10 +15,7 @@ RUN Rscript -e 'remotes::install_version("learnr",upgrade="never", version = "0.
 RUN Rscript -e 'remotes::install_version("golem",upgrade="never", version = "0.3.2")'
 RUN Rscript -e 'remotes::install_version("ROSE",upgrade="never", version = "0.0-4")'
 RUN Rscript -e 'remotes::install_version("DMwR2",upgrade="never", version = "0.0.2")'
-RUN mkdir /build_zone
-ADD . /build_zone
-WORKDIR /build_zone
-RUN R -e 'remotes::install_local(upgrade="never")'
-RUN rm -rf /build_zone
+RUN Rscript -e 'remotes::install_github("It4innovations/r-courses", upgrade = "never")'
+RUN Rscript -e 'remotes::install_version("skimr",upgrade="never", version = 2.1.4")'
 EXPOSE 3838
 CMD  ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');learnr::run_tutorial(name = 'exploratory_analysis', package = 'courses.it4i')"]
