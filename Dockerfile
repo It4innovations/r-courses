@@ -17,5 +17,6 @@ RUN Rscript -e 'remotes::install_version("ROSE",upgrade="never", version = "0.0-
 RUN Rscript -e 'remotes::install_version("DMwR2",upgrade="never", version = "0.0.2")'
 RUN Rscript -e 'remotes::install_github("It4innovations/r-courses", upgrade = "never")'
 RUN Rscript -e 'remotes::install_version("skimr",upgrade="never", version = 2.1.4")'
+RUN Rscript -e 'remotes::install_version("modeldata",upgrade="never", version = 0.1.1")'
 EXPOSE 3838
 CMD  ["R", "-e", "options('shiny.port'=3838,shiny.host='0.0.0.0');learnr::run_tutorial(name = 'exploratory_analysis', package = 'courses.it4i')"]

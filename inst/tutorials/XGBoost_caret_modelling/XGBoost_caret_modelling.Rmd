@@ -22,58 +22,58 @@ data("credit_data")
 knitr::opts_chunk$set(echo = FALSE)
 tutorial_options(exercise.completion = TRUE)
 
-train_ind <- caret::createDataPartition(heart_small$HeartDisease, p = 0.7, list = FALSE)
-train <- heart_small[train_ind, ]
-test <- heart_small[-train_ind, ]
-
-ctrl <- caret::trainControl(method = "cv",
-                     number = 5,
-                     classProbs = TRUE,
-                     summaryFunction = twoClassSummary
-                     )
-
-tune_params <- expand.grid(colsample_bytree = 0.7,
-                          eta = 0.3,
-                          subsample = c(0.5),
-                          nrounds = 100,
-                          gamma = c(0.5),
-                          min_child_weight = c(1),
-                          max_depth = 6)
-rec_obj <- recipes::recipe(HeartDisease ~ ., data = train) |>
-  recipes::step_center(c(2, 6, 7, 15)) |> 
-  recipes::step_scale(c(2, 6, 7, 15)) 
-set.seed(5627)
-xgb_model_clean <- train(rec_obj,
-                         data = train,
-                         method = "xgbTree",
-                         metric = "ROC",
-                         trControl = ctrl,
-                         verbosity = 0,
-                         tuneGrid = tune_params)
-
-ctrl$sampling <- "rose"
-
-set.seed(5627)
-xgb_model_rose <- train(rec_obj,
-                   data = train,
-                   method = "xgbTree",
-                   metric = "ROC",
-                   trControl = ctrl,
-                   verbosity = 0,
-                   tuneGrid = tune_params
-                   ) 
-
-ctrl$sampling <- "smote"
-
-set.seed(5627)
-xgb_model_smote <- train(rec_obj,
-                   data = train,
-                   method = "xgbTree",
-                   metric = "ROC",
-                   trControl = ctrl,
-                   verbosity = 0,
-                   tuneGrid = tune_params
-                   ) 
+# train_ind <- caret::createDataPartition(heart_small$HeartDisease, p = 0.7, list = FALSE)
+# train <- heart_small[train_ind, ]
+# test <- heart_small[-train_ind, ]
+# 
+# ctrl <- caret::trainControl(method = "cv",
+#                      number = 5,
+#                      classProbs = TRUE,
+#                      summaryFunction = twoClassSummary
+#                      )
+# 
+# tune_params <- expand.grid(colsample_bytree = 0.7,
+#                           eta = 0.3,
+#                           subsample = c(0.5),
+#                           nrounds = 100,
+#                           gamma = c(0.5),
+#                           min_child_weight = c(1),
+#                           max_depth = 6)
+# rec_obj <- recipes::recipe(HeartDisease ~ ., data = train) |>
+#   recipes::step_center(c(2, 6, 7, 15)) |> 
+#   recipes::step_scale(c(2, 6, 7, 15)) 
+# set.seed(5627)
+# xgb_model_clean <- train(rec_obj,
+#                          data = train,
+#                          method = "xgbTree",
+#                          metric = "ROC",
+#                          trControl = ctrl,
+#                          verbosity = 0,
+#                          tuneGrid = tune_params)
+# 
+# ctrl$sampling <- "rose"
+# 
+# set.seed(5627)
+# xgb_model_rose <- train(rec_obj,
+#                    data = train,
+#                    method = "xgbTree",
+#                    metric = "ROC",
+#                    trControl = ctrl,
+#                    verbosity = 0,
+#                    tuneGrid = tune_params
+#                    ) 
+# 
+# ctrl$sampling <- "smote"
+# 
+# set.seed(5627)
+# xgb_model_smote <- train(rec_obj,
+#                    data = train,
+#                    method = "xgbTree",
+#                    metric = "ROC",
+#                    trControl = ctrl,
+#                    verbosity = 0,
+#                    tuneGrid = tune_params
+#                    ) 
 
 ```
 ## Content of this training
@@ -168,7 +168,7 @@ Another important aspect to be considered when creating the training and holdout
 Therefore it is good to make the subsamples in such a way, that the distribution of classes in the training set and holdout set is approximately the same.
 Luckily, the function ```caret::createDataPartition``` will consider the class distribution for us and returns indices in such a way so this distribution is kept.
 
-```{r heart_split_data, exercise = TRUE}
+```{r heart_split_data}
 train_ind <- caret::createDataPartition(heart_small$HeartDisease, p = 0.7, list = FALSE)
 train <- heart_small[train_ind, ]
 test <- heart_small[-train_ind, ]
@@ -194,7 +194,7 @@ rec_obj <- recipes::recipe(HeartDisease ~ ., data = train) |>
 Next step we need to do is define the model control.
 At this step we can define for example what kind of summary function should be used (what kind of metrics will be computed), define the resampling method and its parameters.
 
-```{r control, exercise = TRUE}
+```{r control}
 ctrl <- caret::trainControl(method = "cv",
                      number = 5,
                      classProbs = TRUE,
@@ -209,7 +209,7 @@ For this `expand.grid()` function is the best, since it will create grid of all 
 In case of large number of parameters, or long computational time, it is good to use some space filling algorithm from the field of design of experiments.
 Many packages concerned with this can be found in CRAN [task view](https://cran.r-project.org/web/views/ExperimentalDesign.html)
 
-```{r tuning, exercise = TRUE}
+```{r tuning}
 tune_params <- expand.grid(colsample_bytree = 0.7,
                           eta = 0.3,
                           subsample = 0.5,
@@ -224,7 +224,7 @@ Finally, we will put all the things together and train the model.
 Depending on the option we choose, several models will be trained and the best one will be chosen for usage in prediction.
 In train function we choose the model we want to use and metric which should be used for model evaluation.
 
-```{r training, exercise = TRUE}
+```{r training}
 set.seed(5627)
 xgb_model_clean <- train(rec_obj,
                          data = train,
@@ -243,7 +243,7 @@ There are several ways how to handle unbalanced classes, we could use custom fun
 Now we will run
 
 Rose and SMOTE drop observations with NAs
-```{r rose, exercise = TRUE}
+```{r rose}
 ctrl$sampling <- "rose"
 
 set.seed(5627)
@@ -257,7 +257,7 @@ xgb_model_rose <- train(rec_obj,
                    ) 
 ```
 
-```{r smote, exercise = TRUE}
+```{r smote}
 ctrl$sampling <- "smote"
 
 set.seed(5627)
