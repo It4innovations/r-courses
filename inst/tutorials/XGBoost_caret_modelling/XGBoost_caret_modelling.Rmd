@@ -281,8 +281,8 @@ resampling <- caret::resamples(final_models)
 
 prediction <- final_models |>
   lapply(courses.it4i::test_roc,
-         data = input_data$test[, -1],
-         y = as.numeric(input_data$test[[1]]))
+         data = test[, -1],
+         y = as.numeric(test[[1]]))
 
 prediction <- lapply(prediction, as.vector)
 prediction <- do.call("rbind", prediction)
