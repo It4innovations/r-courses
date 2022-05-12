@@ -168,7 +168,7 @@ Another important aspect to be considered when creating the training and holdout
 Therefore it is good to make the subsamples in such a way, that the distribution of classes in the training set and holdout set is approximately the same.
 Luckily, the function ```caret::createDataPartition``` will consider the class distribution for us and returns indices in such a way so this distribution is kept.
 
-```{r heart_split_data}
+```{r heart_split_data, exercise = T}
 train_ind <- caret::createDataPartition(heart_small$HeartDisease, p = 0.7, list = FALSE)
 train <- heart_small[train_ind, ]
 test <- heart_small[-train_ind, ]
@@ -183,7 +183,7 @@ Here we will have only two steps, centering and scaling, however [recipes](https
 Among them are also imputation of values for the NAs.
 Another thing that the [recipes](https://recipes.tidymodels.org) can do is add roles to variables. That way some of the variables does not need to be used during training, but may be used to check the predictive ability in deeper way.
 
-```{r recipes}
+```{r recipes, exercise = T}
 rec_obj <- recipes::recipe(HeartDisease ~ ., data = train) |>
   recipes::step_center(c(2, 6, 7, 15)) |> 
   recipes::step_scale(c(2, 6, 7, 15)) 
@@ -194,7 +194,7 @@ rec_obj <- recipes::recipe(HeartDisease ~ ., data = train) |>
 Next step we need to do is define the model control.
 At this step we can define for example what kind of summary function should be used (what kind of metrics will be computed), define the resampling method and its parameters.
 
-```{r control}
+```{r control, exercise = T}
 ctrl <- caret::trainControl(method = "cv",
                      number = 5,
                      classProbs = TRUE,
@@ -209,7 +209,7 @@ For this `expand.grid()` function is the best, since it will create grid of all 
 In case of large number of parameters, or long computational time, it is good to use some space filling algorithm from the field of design of experiments.
 Many packages concerned with this can be found in CRAN [task view](https://cran.r-project.org/web/views/ExperimentalDesign.html)
 
-```{r tuning}
+```{r tuning, exercise = T}
 tune_params <- expand.grid(colsample_bytree = 0.7,
                           eta = 0.3,
                           subsample = 0.5,
@@ -224,7 +224,7 @@ Finally, we will put all the things together and train the model.
 Depending on the option we choose, several models will be trained and the best one will be chosen for usage in prediction.
 In train function we choose the model we want to use and metric which should be used for model evaluation.
 
-```{r training}
+```{r training, exercise = T}
 set.seed(5627)
 xgb_model_clean <- train(rec_obj,
                          data = train,
@@ -243,7 +243,7 @@ There are several ways how to handle unbalanced classes, we could use custom fun
 Now we will run
 
 Rose and SMOTE drop observations with NAs
-```{r rose}
+```{r rose, exercise = T}
 ctrl$sampling <- "rose"
 
 set.seed(5627)
@@ -257,7 +257,7 @@ xgb_model_rose <- train(rec_obj,
                    ) 
 ```
 
-```{r smote}
+```{r smote, exercise = T}
 ctrl$sampling <- "smote"
 
 set.seed(5627)
