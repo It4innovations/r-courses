@@ -1,0 +1,26 @@
+Package: courses.it4i
+Title: IT4I courses
+Version: 0.0.0.9000
+Authors@R: person('Tomas', 'Martinovic', email = 'tomas.martinovic@vsb.cz', role = c('cre', 'aut'))
+Description: This is a package containing learnr documents for IT4I trainings.
+License: MIT + file LICENSE
+Imports: 
+    config,
+    golem,
+    shiny,
+    learnr,
+    xgboost,
+    caret,
+    naniar,
+    visdat,
+    outliers,
+    pROC,
+    recipes,
+    ggplot2,
+    ROSE,
+    DMwR2
+Encoding: UTF-8
+LazyData: true
+RoxygenNote: 7.1.2
+URL: https://github.com/It4innovations/r-courses
+BugReports: https://github.com/It4innovations/r-courses/issues

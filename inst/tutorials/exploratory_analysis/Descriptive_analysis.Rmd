@@ -1,0 +1,306 @@
+---
+title: "Brief Introduction to Exploratory Data Analysis in R"
+output: 
+  learnr::tutorial:
+    toc: true
+    progressive: true
+    allow_skip: true
+runtime: shiny_prerendered
+editor_options: 
+  markdown: 
+    wrap: sentence
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(naniar)
+library(visdat)
+library(dplyr)
+library(outliers)
+data(airquality)
+knitr::opts_chunk$set(echo = FALSE)
+tutorial_options(exercise.completion = TRUE)
+```
+## Content of this training
+
+-   Why is the exploratory analysis important
+-   Skimming through data
+-   Missing observations
+-   Outliers
+-   Other findings
+-   Cheatsheet
+-   Exercises
+
+## Why is the exploratory analysis important
+
+### Purpose of exploratory data analysis
+
+Basic exploratory analysis serves to:
+
+-   uncover patterns, anomalies,
+-   check the data consistency,
+-   explore connection between variables,
+-   produce assumptions, hypothesis,
+-   understand data as a basis for modelling, predictions, etc.
+
+### General truth about data sources
+
+Companies tend to collect a lot of information, however often struggle in one or more of the following:
+
+-   proper storage format,
+-   proper collection workflow definition,
+-   validation of the collectors,
+-   ability to extract the data on demand,
+-   documentation of the collected data,
+-   unification of data across multiple sites/stations/etc.,
+-   information extraction.
+
+## Skimming through data
+
+### First thing to do with a new dataset
+
+When we get hands on a new data, the first thing we want to do is get a feeling how the data looks like.
+At this moment we will assume we are working with tabular objects such as data.frame, data.table, or tibble as these are essential object in R data analysis.
+It would be possible to extend some of the practices to the other data types, but these are not part of this course.
+
+To check the data.frame we have many possibilities such as function `head()`, `summary()`, `str()`, `skimr::skim()`, `dlyr::glimpse()`.
+Here we will focus on the `skim()` function from the [skimr](https://github.com/ropensci/skimr) package which provides the most information and great flexibility by making it possible to add Your own summary statistics.
+
+### Skimr basics
+
+Let's see the output of the `skim()` function on the `riskfactors`` dataset provided with the [naniar](https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html) package.
+You can start by clicking **"Run"** in the interactive window below.
+Be aware that the output of the
+
+```{r starwars_skim, exercise=TRUE, exercise.lines=2}
+naniar::riskfactors |> 
+  skimr::skim()
+```
+
+Among many pros of using `skim()` is that it returns a special form of data.frame containing columns `skim_type` and `skim_variable`.
+The [skimr](https://github.com/ropensci/skimr) package is working very well with other packages from the [tidyverse](https://www.tidyverse.org) universe and with pipes.
+That means that for example we can filter only the numeric variables with mean greater than 190 by calling `dplyr::filter(numeric.mean > 190)` on the results of `skim()`.
+
+```{r riskfactors_filter, exercise=TRUE}
+naniar::riskfactors |> 
+  skimr::skim() |> 
+  dplyr::filter(numeric.mean > 190)
+```
+
+### Skim group_by()
+
+Another feature of the `skim()` is that it works with [dplyr](https://dplyr.tidyverse.org) grouping.
+That way we can see the statistics across groups.
+Of course it starts to get a little messy when there is many unique values in a groups, since this will create a (n-1)*m rows, where n is original number of rows and m is number of unique values in a group.
+
+```{r riskafactors_group_by, exercise=TRUE}
+naniar::riskfactors |> 
+  dplyr::select(state, sex, age, weight_lbs, height_inch, marital) |> 
+  dplyr::group_by(sex) |> 
+  skimr::skim()
+```
+
+### Customizing skim()
+
+[skimr](https://github.com/ropensci/skimr) authors provided a number of statistics for basics datatypes.
+However, there might be a time when we want to know something else.
+This is possible by easy definition system for new statistics using ```skimr::skim_with()``` and ```skimr::sfl()``` functions.
+
+```{r riskfactors_custom, exercise=TRUE}
+my_skim <- skimr::skim_with(numeric = skimr::sfl(new_mad = ~mad(., na.rm = TRUE),
+                                                 na_mad = ~mad(., na.rm = FALSE)),
+                            append = FALSE)
+naniar::riskfactors |> 
+  dplyr::select(tidyselect::vars_select_helpers$where(is.numeric)) |> 
+  my_skim()
+```
+
+<!-- ### Some things missing -->
+
+<!-- [skimr](https://github.com/ropensci/skimr) provides many helper function when working with it. -->
+<!-- Some examples are: -->
+
+<!-- - Subsetting skimr_type using `skimr::yank()` -->
+<!-- - Partitioning `skimr::skim()` output into multiple chunks with `skimr::partition()` -->
+<!-- - Subsetting computed statistics with `skimr::focus()` -->
+<!-- - Getting the skim info printed without changing the input data with `skimr::skim_tee()` -->
+<!-- - Convert the `skim_df` object into the "long" output with `skimr::to_long()` -->
+<!-- - Great number of other helper  functions in [skimr](https://github.com/ropensci/skimr) and [visdat](https://github.com/ropensci/visdat) packages. -->
+
+## Missing observations
+
+Another important factor happening a lot in any real world dataset are missing observations.
+It is normal that these happens due to many different reasons such as not applicable answers in questionnaires, power failure in the measuring equipment, human error and many more.
+
+Luckily there are specialized packages concerned with visualizing data and providing specialized plots to help the uncover different aspects of the missing data.
+Here we will test two packages one is [visdat](https://github.com/ropensci/visdat) and the other is already mentioned [naniar](https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html) which uses [ggplot2](https://ggplot2.tidyverse.org).
+
+In R the missing data are represented by NA.
+Let's take a look on the distribution of NAs across the dataset with ```visdat::vis_miss()``` function.
+This function shows the places where are the NAs in the dataset across individual variables and observations.
+That way we can see, if there is somebody with tendency of not responding to the question in questionnaire, or whether there is a group of people who tends to not answer the same questions.
+
+```{r visdat_missing, exercise = TRUE}
+naniar::riskfactors |>
+  visdat::vis_miss()
+```
+
+The next plot is very interesting plot, which visualizes the most prevalent combinations of NAs happening in the dataset. This is `naniar::gg_miss_upset()` plot. I like it very much as it visualize some very interesting relationships which might be difficult to find otherwise.
+
+```{r missing_upset, exercise = TRUE}
+naniar::riskfactors |>
+  naniar::gg_miss_upset(nsets = 15,
+                        nintersects = 40)
+```
+
+Next we will take a look at a simple histogram of the number of missing observations across the variables using `naniar::gg_miss_var()`.
+
+```{r missing_var_count, exercise = TRUE}
+naniar::riskfactors |> 
+  naniar::gg_miss_var()
+```
+    
+One very interesting way to look at the dataset is seeing how the NAs across variables are distributed across the groups of selected variable.
+This is possible to see by the `naniar::gg_miss_fct()` function, however there is one important caveat here, this function shows the percentage of NAs from the given group and that may lead to very misleading findings.
+Let's see:
+    
+```{r missing_fct, exercise = TRUE}
+naniar::riskfactors |> 
+  naniar::gg_miss_fct(fct = marital)
+```
+
+There is also a possibility to visualize how many percent of the columns contain NAs for the given observations. The `naniar::gg_miss_case` shows this and has also switches to order the cases by the amount of missing obsevations and to choose between absolute counts and percentage.
+
+```{r missing_case, exercise = TRUE}
+naniar::riskfactors |> 
+    naniar::gg_miss_case(order_cases = FALSE,
+                         show_pct = TRUE)
+```
+
+Last plot about the missing observations we will go through is focused on the point plot.
+Normally, when using [ggplot2](https://ggplot2.tidyverse.org) and running a `geom_point()` it will remove the NAs automatically.
+[naniar](https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html) implemented the function where the missing observations are visualized as a -10% of the lowest value. This can give an idea whether the missing observations miss for both variables, or only one.
+
+```{r missing, exercise = TRUE}
+naniar::riskfactors |>
+  ggplot2::ggplot(ggplot2::aes(x = drink_days,
+                               y = drink_average)) + 
+  naniar::geom_miss_point()
+```
+
+## Outliers
+
+When exploring the data, one of the very important parts is detecting the odd observations.
+One type of such observation are called outliers.
+These are observations which are very different than the rest.
+One common with outliers is, that they do not have a clear definition.
+Also, once detected it is important to understand the nature of these outliers.
+Are they a mistake of measuring device, human error, or are they a real state if something which can happen, but is rare?
+All of the above are possible.
+In R there is a package called [outliers](https://cran.r-project.org/package=outliers) which contains the most used method of detecting outliers.
+
+Here we will take try just two of them. The first is called a z-score.
+The definition can be found for example [here](https://articles.outlier.org/z-score-formula-examples-and-how-to-interpret).
+The advantage of z-score is easy interpretation.
+Also, if we consider that the data is normally distributed we can compute probabilities and quantile of the observation.
+
+```{r z-score, exercise = TRUE}
+naniar::riskfactors |>
+  dplyr::select_if(is.numeric) |>
+  na.omit() |> 
+  outliers::scores(type = "z")
+```
+
+The second approach we will test is [inter-quantile range](https://en.wikipedia.org/wiki/Interquartile_range) (IQR).
+This method is actually used for the visualization of the box-plots.
+The box is a range from first to third quantile, the line in the box is median, whiskers are observations which are at most 1.5 times the IQR.
+Finally, the dots are the outliers.
+To have a clear view of this, we will use `starwars` dataset from the [dplyr](https://dplyr.tidyverse.org) package.
+
+First the boxplot
+
+```{r boxplot, exercise = TRUE}
+dplyr::starwars |> 
+  ggplot2::ggplot(ggplot2::aes(y = birth_year)) +
+  ggplot2::geom_boxplot()
+```
+
+and then also the [outliers](https://cran.r-project.org/package=outliers) package `scores()` function with a type "iqr" and limit 1.5.
+
+```{r iqr, exercise = TRUE}
+dplyr::starwars$birth_year |> 
+  na.omit() |> 
+  outliers::scores(type = "iqr", lim = 1.5) 
+```
+
+One last note, the above mentioned methods work with univariate variables.
+For the multivariate variables a very simple, but well working algorithm is for example [DBSCAN](https://en.wikipedia.org/wiki/DBSCAN).
+
+## Cheatsheet
+
+- `skimr::skim()` - the overall statistics of the dataset
+- `skimr::skim_with()` - customize the skim function
+- `skimr::sfl()` -  define custom statistic
+- `visdat::vis_miss()` - visualize missing observation in data
+- `naniar::gg_miss_upset()` - visualize count of combinations of missing observations
+- `naniar::gg_miss_var()` - histogram of missing observations
+- `naniar::gg_miss_fct()` - percentage of missing observations for individual levels of factor
+- `naniar::gg_miss_case()` - number of missing cases across observations
+- `outliers::scores()` - different score functions from outliers package
+
+## Exercises {data-progressive="FALSE"}
+
+Now here is a part for some hands-on to reinforce what we have learned.
+We will work with the airquality dataset.
+You are free to use the interactive window below to find out answers to the quiz questions under it.
+
+```{r airquality, exercise = TRUE}
+airquality |> 
+  skimr::skim()
+```
+
+
+```{r quiz}
+quiz(
+  question("Which of these variables contain missing observations?",
+    answer("Ozone", correct = TRUE),
+    answer("Temp"),
+    answer("Solar.R", correct = TRUE),
+    answer("Wind")
+  ),
+  question("How many observations are missing in multiple variables?",
+    answer("none"),
+    answer("one"),
+    answer("two", correct = TRUE),
+    answer("five")
+  ),
+  question("How many outliers are in the airquality dataset for the z-score with threshold of 3?",
+    answer("none"),
+    answer("one"),
+    answer("two", correct = TRUE),
+    answer("five")
+  ),
+  question("In which month was the highest median of Ozone and in which month it was highest mean?",
+    answer("8 and 9"),
+    answer("6 and 7"),
+    answer("7 and 8", correct = TRUE))
+)
+```
+
+For more fun I recommend taking a look at `starwars` dataset from [dplyr](https://dplyr.tidyverse.org).
+
+## Useful resources
+
+I found inspiration, or plainly used the same examples as are on other sites and would like to use this place to link them here. (I deeply apologize to all the ones I might have forgotten about.)
+Most of them contain much more details about individual parts that were covered by this short tutorial.
+
+- skimr github - [https://github.com/ropensci/skimr](https://github.com/ropensci/skimr)
+- visdat github - [https://github.com/ropensci/visdat](https://github.com/ropensci/visdat)
+- naniar Vignette - [https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html](https://cran.r-project.org/web/packages/naniar/vignettes/getting-started-w-naniar.html)
+- Nicholas Tierney's [Gallery of Missing Data Visualisations](https://naniar.njtierney.com/articles/naniar-visualisation.html#gg_miss_which)
+- outliers CRAN page - [https://cran.r-project.org/package=outliers](https://cran.r-project.org/package=outliers)
+- ggplot2 page - [https://ggplot2.tidyverse.org](https://ggplot2.tidyverse.org)
+- dplyr page - [https://dplyr.tidyverse.org](https://dplyr.tidyverse.org)
+- z-score page - [https://articles.outlier.org/z-score-formula-examples-and-how-to-interpret](https://articles.outlier.org/z-score-formula-examples-and-how-to-interpret)
+- IQR page - [https://en.wikipedia.org/wiki/Interquartile_range](https://en.wikipedia.org/wiki/Interquartile_range)
+- DBSCAB page - [https://en.wikipedia.org/wiki/DBSCAN](https://en.wikipedia.org/wiki/DBSCAN)
