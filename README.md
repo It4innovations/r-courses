@@ -1,4 +1,4 @@
-# r-course
+# courses.it4i
 This repo contains files, for various trainings for R provided by IT4Innovations.
 It is created as an R package which contains helper functions and Rmd documents (in inst/tutorial folder) with courses.
 
