@@ -18,6 +18,8 @@ library(visdat)
 library(dplyr)
 library(outliers)
 library(vtree)
+library(tidyr)
+library(skimr)
 data(airquality)
 knitr::opts_chunk$set(echo = FALSE)
 tutorial_options(exercise.completion = TRUE)
@@ -355,7 +357,7 @@ naniar::riskfactors |>
 ```
 
 One very interesting way to look at the dataset is seeing how the NAs across variables are distributed across the groups of selected variable.
-This is possible to see by the `naniar::gg_miss_fct()` function, however there is one important caveat here, this function shows the percentage of NAs from the given group and that may lead to very misleading findings.
+This is possible to see by the [naniar::gg_miss_fct()](https://naniar.njtierney.com/reference/gg_miss_fct.html) function, however there is one important caveat here, this function shows the percentage of NAs from the given group and that may lead to very misleading findings.
 Let's see:
 
 ```{r missing_fct, exercise = TRUE}
@@ -441,7 +443,7 @@ The box is a range from first to third quantile, the line in the box is median, 
 Finally, the dots are the outliers.
 To have a clear view of this, we will use `starwars` dataset from the [dplyr](https://dplyr.tidyverse.org) package.
 
-First the boxplot
+First the boxplot `geom_boxplot()` in [ggplot2](https://ggplot2.tidyverse.org) package
 
 ```{r boxplot, exercise = TRUE}
 dplyr::starwars |> 
@@ -453,7 +455,7 @@ dplyr::starwars |>
   ggplot2::geom_boxplot()
 ```
 
-and then also the [outliers](https://cran.r-project.org/package=outliers) package `scores()` function with a type "iqr" and limit 1.5.
+and then also the [outliers](https://cran.r-project.org/package=outliers) package `scores()` function with a type "iqr" and limit (variable `lim`) 1.5.
 
 ```{r iqr, exercise = TRUE}
 dplyr::starwars$birth_year |> 
@@ -467,7 +469,8 @@ dplyr::starwars$birth_year |>
 ```{r iqr-solution}
 dplyr::starwars$birth_year |> 
   na.omit() |> 
-  outliers::scores(type = "iqr", lim = 1.5) 
+  outliers::scores(type = "iqr",
+                   lim = 1.5) 
 ```
 
 One last note, the above mentioned methods work with univariate variables.
@@ -489,7 +492,11 @@ head (vtree::FakeData)
 The [`vtree::vtree()`](https://www.rdocumentation.org/packages/vtree/versions/5.6.5/topics/vtree) function provides an exhaustive amount of visualization options:
 
 ```{r vtrees2, exercise = TRUE}
-vtree(FakeData,"Group Sex Severity",title="People",showlegend=TRUE,shownodelabels=FALSE)
+vtree(FakeData,
+      "Group Sex Severity",
+      title = "People",
+      showlegend = TRUE,
+      shownodelabels = FALSE)
 ```
 
 The main advantages of this approach are the minimization of possible errors caused by the manual calculation of all necessary summary statistics and it's reproducibility when a revised tree can be automatically produced for the updated dataset.
@@ -501,10 +508,6 @@ We will work with the airquality dataset.
 You are free to use the interactive window below to find out answers to the quiz questions under it.
 
 ```{r airquality, exercise = TRUE}
-airquality |> 
-```
-
-```{r airquality-solution}
 airquality |> 
     skimr::skim()
 ```
@@ -567,10 +570,10 @@ For more fun I recommend taking a look at `starwars` dataset from [dplyr](https:
 
 #### naniar
 
--   [gg_miss_upset()](https://www.rdocumentation.org/packages/naniar/versions/1.0.0/topics/gg_miss_upset) - visualize count of combinations of missing observations
--   [gg_miss_var()](https://www.rdocumentation.org/packages/naniar/versions/1.0.0/topics/gg_miss_var) - histogram of missing observations
--   [gg_miss_fct()](https://www.rdocumentation.org/packages/naniar/versions/1.0.0/topics/gg_miss_fct)  - percentage of missing observations for individual levels of factor
--   [gg_miss_case()](https://www.rdocumentation.org/packages/naniar/versions/1.0.0/topics/gg_miss_case) - number of missing cases across observations
+-   [gg_miss_upset()](https://naniar.njtierney.com/reference/gg_miss_upset.html) - visualize count of combinations of missing observations
+-   [gg_miss_var()](https://naniar.njtierney.com/reference/gg_miss_var.html) - histogram of missing observations
+-   [gg_miss_fct()](https://naniar.njtierney.com/reference/gg_miss_fct.html)  - percentage of missing observations for individual levels of factor
+-   [gg_miss_case()](https://naniar.njtierney.com/reference/gg_miss_case.html) - number of missing cases across observations
 
 #### outliers
 
