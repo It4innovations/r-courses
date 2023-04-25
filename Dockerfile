@@ -21,6 +21,7 @@ RUN Rscript -e 'remotes::install_version("caret",upgrade="never", version = "6.0
 RUN Rscript -e 'remotes::install_version("xgboost",upgrade="never", version = "1.7.5.1")'
 RUN Rscript -e 'remotes::install_version("learnr",upgrade="never", version = "0.11.2")'
 RUN Rscript -e 'remotes::install_version("golem",upgrade="never", version = "0.4.0")'
+RUN Rscript -e 'remotes::install_version("skimr",upgrade="never", version = "2.1.5")'
 RUN mkdir /build_zone
 ADD . /build_zone
 WORKDIR /build_zone
