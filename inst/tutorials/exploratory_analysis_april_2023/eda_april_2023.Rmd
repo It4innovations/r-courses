@@ -96,7 +96,8 @@ head(iris)
 ```
 Here, each observation describes a flower. The first four columns it's sepal length and width and petal length and width, the last column than it's species. The first four column names in this dataset contain two variables:  leaf type (with values sepal and petal) and leaf measure (with values length and width).
 
-The key to transform this dataset to it's tidy form is the function [`tidyr::pivot_longer()`](https://tidyr.tidyverse.org/reference/pivot_longer.html):
+The key to transform this dataset to it's tidy form is the function [`tidyr::pivot_longer()`](https://tidyr.tidyverse.org/reference/pivot_longer.html).
+Additionally, You will need the function [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) to assign a unique identifier to individual flowers and the function [`tidyr::separate()`](https://tidyr.tidyverse.org/reference/separate.html) to split the variables type and measure.
 
 ```{r pivotlonger, exercise = TRUE}
 iris.tidy <- iris |> 
@@ -118,10 +119,7 @@ iris.tidy <- iris |>
 head(iris.tidy)
 ```
 
-The function [`dplyr::mutate()`](https://dplyr.tidyverse.org/reference/mutate.html) is used here to assign a unique identifier to individual flowers and the function [`tidyr::separate()`](https://tidyr.tidyverse.org/reference/separate.html) to split the variables type and measure.
-
 What would happen if you forgot to use `separate` function ?
-
 
 ```{r pivotlonger2, exercise = TRUE}
 
@@ -143,7 +141,7 @@ tidyr::pivot_wider(names_from = c("measure"),
 The `tidyr::relig_income` dataset containes three variables: religion, income and frequency.
 
 ```{r religincome, exercise = TRUE}
-tidyr::relig_income
+relig_income
 ```
 
 To tidy it, we need to pivot longer the non-variable columns into a two-column key-value pair.
@@ -163,7 +161,7 @@ relig_income |>
 The `tidyr::billboard` dataset records the billboard rank of songs in the year 2000.
 
 ```{r billboard, exercise = TRUE}
-tidyr::billboard
+billboard
 ```
 
 It has variables for artist, track, date.entered, rank and week. The rank in each week after it enters the top 100 is recorded in 75 columns, wk1 to wk76.
