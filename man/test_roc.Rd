@@ -13,9 +13,6 @@ test_roc(model, data, y)
 
 \item{y}{a vector with the refence data}
 }
-\value{
-
-}
 \description{
 This function is taken from https://topepo.github.io/caret/subsampling-for-class-imbalances.html#subsampling-techniques and adjusted for this tutorial.
 It computes ROC on the test set.

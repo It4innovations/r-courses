@@ -15,9 +15,6 @@ get_data_partition(input_data, target_col, train_ratio, split_y = FALSE)
 
 \item{split_y}{should the target variable be returned separately?}
 }
-\value{
-
-}
 \description{
 This function divide data into training and holdout set and returns them as a list.
 It uses caret package createDataPartition() function to make the division.
