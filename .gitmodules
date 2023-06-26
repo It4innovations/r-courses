@@ -1,0 +1,3 @@
+[submodule "inst/tutorials"]
+	path = inst/tutorials
+	url = https://github.com/It4innovations/r-training-learnr.git
